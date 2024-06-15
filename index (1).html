@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITS Project: Enhancing ArCo Knowledge Graph</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #0779e4 3px solid;
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        nav {
+            float: right;
+            margin-top: 10px;
+        }
+        nav a {
+            margin-left: 20px;
+        }
+        section {
+            padding: 20px;
+            background: #fff;
+            margin: 0 0 20px 0;
+        }
+        footer {
+            background: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>ITS Project: ArCo Knowledge Graph Enhancement</h1>
+            <nav>
+                <a href="#main">Home</a>
+                <a href="#methodology">Methodology</a>
+                <a href="#report">Project Report</a>
+                <a href="#analysis">Analysis</a>
+            </nav>
+        </div>
+    </header>
+
+    <section id="main">
+        <div class="container">
+            <h2>Welcome</h2>
+            <p>Welcome to our ITS project page where we enhance the ArCo Knowledge Graph using SPARQL queries and Large Language Models (LLMs).</p>
+            <p>Meet our dedicated team members:</p>
+            <ul>
+                <li>Assautay Aruana</li>
+                <li>Dinara Kalmakhanova</li>
+                <li>Ingkarim Amangeldikyzy</li>
+                <li>Ozge Kaya</li>
+            </ul>
+        </div>
+    </section>
+    
+
+    <section id="methodology">
+        <div class="container">
+            <h2>Methodology</h2>
+            <p>Our project methodology involved querying the <a href=" http://wit.istc.cnr.it/arco/" target="_blank" title="ArCo ontologies documentation">ArCo Knowledge Graph</a> using SPARQL to extract information about cultural properties like "Tondo Doni", and subsequently using various Large Language Models (LLMs) to generate enriched content that was integrated back into the knowledge graph.</p>
+    
+            <h3>SPARQL Queries</h3>
+            <p>We utilized several SPARQL queries to gather comprehensive data about artworks. Below is the rationale behind each query:</p>
+            
+            <p><strong>Query 1:</strong> Retrieves a list of properties and optionally their labels for the artwork "Tondo Doni", limiting the results to 10. This provides a quick snapshot of the metadata available for this artwork in the knowledge graph.</p>
+            <pre>SELECT DISTINCT ?property ?propertyLabel ?value ?valueLabel 
+                WHERE { ?cp a arco:HistoricOrArtisticProperty ; rdfs:label ?label ; ?property ?value . 
+                OPTIONAL { ?value rdfs:label ?valueLabel . } 
+                FILTER(REGEX(?label, "tondo doni", "i")) } 
+                LIMIT 10</pre>
+    
+            <p><strong>Query 2:</strong> Fetches properties and values along with their labels for "Tondo Doni", ordered by property and limited to 20 entries. It enriches the understanding of each property by providing labels.</p>
+            <pre>SELECT DISTINCT ?property ?value ?propertyLabel ?valueLabel 
+                WHERE { ?cp a arco:HistoricOrArtisticProperty ; rdfs:label ?label ; ?property ?value . OPTIONAL { ?property rdfs:label ?propertyLabel . } 
+                OPTIONAL { ?value rdfs:label ?valueLabel . } 
+                FILTER(REGEX(?label, "tondo doni", "i")) } 
+                ORDER BY ?property LIMIT 20</pre>
+    
+            <p><strong>Query 3:</strong> Obtains artworks related to the subjects "Holy Family" or "Sacra Famiglia", merging results using UNION and sorting by artwork labels. This helps in identifying other artworks related to these pivotal religious themes.</p>
+            <pre>SELECT DISTINCT ?artwork ?artworkLabel ?subject 
+                WHERE { { ?artwork a arco:HistoricOrArtisticProperty ; a-cd:hasSubject ?subject ; rdfs:label ?artworkLabel . ?subject rdfs:label ?subjectLabel . 
+                FILTER(REGEX(?subjectLabel, "holy family", "i")) } 
+                UNION { ?artwork a arco:HistoricOrArtisticProperty ; a-cd:hasSubject ?subject ; rdfs:label ?artworkLabel . ?subject rdfs:label ?subjectLabel . 
+                FILTER(REGEX(?subjectLabel, "sacra famiglia", "i")) } } 
+                ORDER BY ?artworkLabel 
+                LIMIT 20</pre>
+    
+            <p><strong>Query 4:</strong> Lists subjects from the ArCo Knowledge Graph, sorted alphabetically by their labels. This enables us to explore a variety of subjects categorized in the graph for potential further study or enhancement.</p>
+            <pre>SELECT DISTINCT ?subject ?label 
+                WHERE { ?subject a a-cd:Subject ; rdfs:label ?label . } 
+                ORDER BY ?label LIMIT 20</pre>
+    
+            <p><strong>Query 5:</strong> Retrieves and orders detailed information about the artwork "Tondo Doni", focusing on its properties and values, and limiting results to 10 for detailed examination. This query dives deeper into the specific characteristics of "Tondo Doni".</p>
+            <pre>SELECT DISTINCT ?artwork ?artworkLabel ?property ?value 
+                WHERE { ?artwork a arco:HistoricOrArtisticProperty ; rdfs:label ?artworkLabel ; ?property ?value . 
+                FILTER(REGEX(?artworkLabel, "tondo doni", "i")) } 
+                ORDER BY ?artworkLabel LIMIT 10</pre>
+    
+            <h3>Prompting Techniques</h3>
+            <p>We employed various prompting techniques to enhance the outputs of Large Language Models. Here's how each technique contributed:</p>
+            <ul>
+                <li><strong>Zero-shot prompting:</strong> Used to generate initial descriptions and insights without prior context, helping gauge the base-level accuracy and creativity of the LLM.</li>
+                <li><strong>One-shot prompting:</strong> Involved providing the LLM with a single example before asking it to generate similar content, used to refine the accuracy and relevance of the information.</li>
+                <li><strong>Few-shot prompting:</strong> Multiple examples were given to demonstrate a pattern or style of response before posing the main query, improving the LLM's ability to contextualize and detail its responses.</li>
+                <li><strong>Chain-of-thought prompting:</strong> Involved asking the LLM to explain its reasoning step-by-step, which was particularly useful in complex scenarios where multiple pieces of information needed to be interconnected.</li>
+            </ul>
+        </div>
+    </section>
+    
+
+    <section id="report">
+        <div class="container">
+            <h2>Project Report</h2>
+            <p>This section details the outputs from the SPARQL queries and the enhancements provided by the LLMs.</p>
+            <h3>Query Results</h3>
+            <p>The queries returned extensive data about "Tondo Doni", including detailed authorship, techniques used, and historical previews. This foundational data served as the basis for LLM enrichment.</p>
+            <h3>LLM Enhancements</h3>
+            <p>The LLMs provided enriched descriptions, adding layers of narrative and interpretative detail not originally present in the knowledge graph. For instance, the description of the Holy Family was significantly enhanced to include emotional and compositional insights.</p>
+        </div>
+    </section>
+    
+
+    <section id="analysis">
+        <div class="container">
+            <h2>Analysis</h2>
+            <p>In this project, we utilized two major Large Language Models: <a href=" http://chatgpt.com/" target="_blank" title="Chat GPT">OpenAI GPT</a> and <a href="https://gemini.google.com/?hl=it" target="_blank" title="Gemini">Gemini</a>, to enrich the ArCo Knowledge Graph with detailed descriptions and additional metadata about the artworks, particularly focusing on "Tondo Doni". Both models were prompted to generate RDF triples that integrate seamlessly into the existing knowledge graph structure.</p>
+
+            <h3>Impact of OpenAI GPT and Gemini</h3>
+            <p>Both LLMs were used to process and elaborate on the information extracted via SPARQL queries, transforming raw data into structured, rich descriptions that provide deeper insights into the artworks.</p>
+    
+            <ul>
+                <li><strong>OpenAI GPT:</strong> This model was particularly effective in generating detailed and historically accurate descriptions of the artwork and its context. For instance, the RDF output from the two-shot prompting includes comprehensive authorship details, material techniques, and visual previews that expand the artwork's profile within the knowledge graph."</li>
+                <li><strong>Gemini:</strong> Similarly, Gemini contributed by providing enriched textual descriptions that enhance the narrative of the artwork. Its descriptions included not only the basic elements of the painting but also extended into detailed compositional analysis and contextual background, adding a layer of interpretative depth to the knowledge graph.</li>
+            </ul>
+    
+            <h3>Contribution of SPARQL Queries</h3>
+            <p>The SPARQL queries played a crucial role by first identifying and extracting the necessary data points from the ArCo Knowledge Graph that were then enriched by the LLMs. These queries enabled us to target specific aspects of the artwork "Tondo Doni", such as its subject matter, material techniques, and historical significance, setting a foundation for the LLMs to build upon.</p>
+    
+            <h3>Examples of LLM Outputs</h3>
+            <p>The following are examples of RDF triples generated by the LLMs based on the SPARQL query results:</p>
+            <h4>OpenAI GPT Two-Shot Prompting Result:</h4>
+            <pre>
+    @prefix dc: <http://purl.org/dc/elements/1.1/>.
+    @prefix ns1: <http://data.cochrane.org/ontologies/pico/>.
+    @prefix ns2: <https://w3id.org/arco/ontology/context-description/>.
+    @prefix ns3: <https://w3id.org/arco/ontology/arco/>.
+    
+    <http://example.org/Tondo_Doni> a ns3:HistoricOrArtisticProperty;
+        dc:creator "Michelangelo";
+        ns1:materialAndTechnique "tavola/ pittura a tempera";
+        ns1:preview "http://www.sigecweb.beniculturali.it/images/fullsize/ICCD50007125/ICCD5341499_17d7hf69.jpg";
+        dc:coverage "Firenze (FI), Siena (SI)";
+        dc:date "ca 1504-ca 1506";
+        ns2:hasSubject <http://example.org/Holy_Family>.
+    
+    <http://example.org/Holy_Family> a ns2:Subject;
+        ns2:description "The Tondo Doni, also known as the Doni Tondo, is a circular painting by Michelangelo 
+        depicting the Holy Family. It shows the Virgin Mary, 
+        the infant Jesus, and Saint Joseph in a tender embrace. 
+        The painting is known for its innovative composition and emotional intensity.".
+            </pre>
+            <h4>Gemini Two-Shot Prompting Result:</h4>
+            <pre>
+    @prefix dc: <http://purl.org/dc/elements/1.1/>.
+    @prefix ns1: <http://data.cochrane.org/ontologies/pico/>.
+    @prefix ns2: <https://w3id.org/arco/ontology/arco/>.
+    @prefix ns3: <https://w3id.org/arco/ontology/context-description/>.
+    
+    <http://example.org/Tondo_Doni> a ns2:HistoricOrArtisticProperty;
+        ns1:author "Buonarroti Michelangelo (1475/ 1564)";
+        ns1:materialAndTechnique "carta/ bulino, tavola/ pittura a tempera";
+        ns1:preview "http://www.sigecweb.beniculturali.it/images/fullsize/ICCD50007125/ICCD5341499_17d7hf69.jpg";
+        dc:coverage "Firenze (FI)";
+        dc:date "ca 1504-ca 1506";
+        ns3:hasSubject <http://example.org/Holy_Family>.
+    
+    <http://example.org/Holy_Family> a ns3:Subject;
+        ns3:description """The Tondo Doni is a circular painting by Michelangelo Buonarroti, created in the early 16th century. 
+        It depicts the Holy Family with the infant John the Baptist in a naturalistic landscape, 
+        highlighting Michelangelo's masterful use of color and light, 
+        currently housed in the Uffizi Gallery in Florence, Italy.""".
+            </pre>
+  
+            <p>These results illustrate how each LLM responded differently to the same underlying data, offering unique perspectives and enriching the knowledge graph in distinct ways.
+            </p>
+
+            <h4>end</h4>
+
+        </div>
+    </section>
+    
+
+    <footer>
+        <p>
+            
+            ITS Project  © 2024</p>
+    </footer>
+</body>
+</html>
